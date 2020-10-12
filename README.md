@@ -20,6 +20,8 @@ The amount of existing time-series classification tasks increases every day, and
 - As soon as a task is finished, push the code to the repository with self-explanatory details in the commit. Please do **not** push work in progress to the repository.
 - Do **not** push data files (i.e. dataset, embeddings, models etc.) to the repository as it is only intended for source files. When you want to share data files, use this [Cloud directory](https://cloud.dfki.de/owncloud/index.php/f/64008678)
 - Document the code along with your implementation because it becomes very difficult to do it at the end.
+- Create a **"src"** folder for the code, **"images"** folder for plots, and a **"statistics"** folder for evaluation files. This structure will help you to organize the files within the repository.
+- Note down your findings in this readme. Use the sections below that are created for each Milestone. Only summarize the finding. For deatails you can create individual files and link them (e.g. M1_readme.md).
 
 **Dataset sources:**  
 Huge Collection of time-series datasets: www.timeseriesclassification.com/  
@@ -28,7 +30,7 @@ Snythetic Anomaly Detection dataset: www.bit.ly/2UNk0Lo
 
 
 **Suggested datasets:**  
-- Character Trajectories: Back-projection is very interpretable.
+- Character Trajectories: Back-projection is very interpretable. (Main focus)
 - Synthetic Anomaly Dectection: Classification task is interpretable.
 - FordA: Wide spread uni-variate datset.
 - Electric Devices: Provides huge discrepancy between the classes.
@@ -38,4 +40,14 @@ Snythetic Anomaly Detection dataset: www.bit.ly/2UNk0Lo
 
 ==================================================
 
-## Project plan
+# Project plan
+
+## Milestone 1 : [Dealing with patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/1)
+
+## Milestone 2 : [Cluster patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/2)
+
+## Milestone 3 : [TCAV for patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/3)
+
+## Milestone 4 : [Enhanced patch classification network](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/4)
+
+## Milestone 5 : [Rethinking the patch weights](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/5)
