@@ -11,23 +11,34 @@ import sklearn.cluster
 from sklearn import metrics
 
 
-def form_clusters(inputs, clustering, labels_true=None):
+def form_clusters(inputs, clustering, params, labels_true=None):
 
+  if clustering == "DBSCAN":
+    param = "eps"
+  elif clustering == "OPTICS":
+    param = "min_samples"
+  else:
+    param = "n_clusters"
+  
   score_types = { 
-                  "num_clusters" : [],
+                  param : [], "n_clusters" : [],
                   "silhouette" : [], "cal_har" : [], "dav_bould" : [],
                   "adj_rand" : [],  "adj_mut_inf" : [], "v_measure" : [], "fowlk_mall" : []
                 }
-  K = range(2,21)
+
   start_time = time.time()
   h = hpy()
+  for p in tqdm(params):
+    
+    cluster_line = "sklearn.cluster.%s(%s = p).fit(inputs)" % (clustering, param)
 
-  for k in tqdm(K):
-    cluster_line = "sklearn.cluster.%s(n_clusters=k).fit(inputs)" % (clustering)
     clusters = eval (cluster_line)
     labels_pred = clusters.labels_
 
-    score_types["num_clusters"].append(k)
+    if clustering not in ("KMeans", "AgglomerativeClustering"):
+      score_types["n_clusters"].append(len(np.unique(labels_pred)))
+
+    score_types[param].append(p)
     score_types["silhouette"].append(metrics.silhouette_score(inputs, labels_pred, metric='euclidean'))
     score_types["cal_har"].append(metrics.calinski_harabasz_score(inputs, labels_pred))
     score_types["dav_bould"].append(metrics.davies_bouldin_score(inputs, labels_pred))
@@ -42,10 +53,14 @@ def form_clusters(inputs, clustering, labels_true=None):
   print("runtime: ",time.time()-start_time, end="\n\n")
   print("memory consumption:")
   print(h.heap(), end="\n\n")
-  plt.plot(K, score_types["silhouette"], 'bx-')
-  plt.show() 
+  if len(params) > 1:
+    plt.plot(params, score_types["silhouette"], 'bx-')
+    plt.show() 
 
   score_types = {k:v for k,v in score_types.items() if v}
   df = pd.DataFrame(score_types)
   df = df.to_string(index=False)
   print (df)
+  
+  if clustering == "KMeans":
+    return clusters.cluster_centers_    
