@@ -64,4 +64,18 @@ def plotChar(train_data,train_indexes,train_inputs,char,index=None):
 
     X,Y,C = toPlot_char(input)
     for x,y,c in zip(X,Y,C):
-      axs[0 if i<cols else 1,i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
+      axs[i//cols,i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
+
+
+def plotClusters(cluster_centers, sample_shape):
+
+  n_centers = len(cluster_centers)
+  cols = int(np.ceil(n_centers/3))
+  fig, axs = plt.subplots(3,cols, figsize=(15,6))
+
+  for i,center in enumerate(cluster_centers):
+    center = center.reshape(sample_shape)
+    
+    X,Y,C = toPlot_char(center)
+    for x,y,c in zip(X,Y,C):
+      axs[i//cols, i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
