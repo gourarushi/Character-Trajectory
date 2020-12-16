@@ -66,6 +66,36 @@ def plotChar(train_data,train_indexes,train_inputs,char,index=None):
     for x,y,c in zip(X,Y,C):
       axs[i//cols,i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
 
+def plotTimeSeries(train_data,train_indexes,train_inputs,char,index=None):
+
+  np.random.seed(0)
+
+  if not index:
+    # random sample of manually selected character
+    index = classes.index(char)
+    indexes = np.where(np.array(train_data)==index)[0]
+    index = np.random.choice(indexes)
+
+  input, label = train_data[index]
+
+  print(classes[int(label)])
+  print('original sample')
+  plt.plot(np.transpose(input))
+  plt.show()
+
+  indexes = np.where(train_indexes == index)[0]
+  n_patches = len(indexes)
+  print(n_patches,'patches')
+  cols = int(np.ceil(n_patches/2))
+  fig, axs = plt.subplots(2,cols, figsize=(15,6))
+
+  for i,index in enumerate(indexes):
+    input = train_inputs[index]
+    indicator = input[3]
+    indicator = np.where(indicator==1)[0]
+    input = [np.take(channel,indicator) for channel in input[:3]]
+    axs[i//cols,i%cols].plot(np.transpose(input))
+
 
 def plotClusters(cluster_centers, sample_shape):
 
@@ -78,4 +108,7 @@ def plotClusters(cluster_centers, sample_shape):
     
     X,Y,C = toPlot_char(center)
     for x,y,c in zip(X,Y,C):
-      axs[i//cols, i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
+      if n_centers > 3:
+        axs[i//cols, i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
+      else:
+        axs[i].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
