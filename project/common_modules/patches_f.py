@@ -16,7 +16,7 @@ def interpolate(arr,newSize):
   return newArr
 
 # function to return list of patches for a given dataset
-def dataToPatches(data, window_size, stride, resizeTo, medianFilter=False, gaussianFilter=False, normalize=False):
+def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False, gaussianFilter=False, normalize=False):
   inputs = []
   labels = []
   indexes = []
@@ -33,7 +33,10 @@ def dataToPatches(data, window_size, stride, resizeTo, medianFilter=False, gauss
           values  = [0]*i
           values += list(channel)[i:i+window_size]
           values += [0]*(inputLen - i - window_size)
-          values = interpolate(values,resizeTo)
+          if resizeTo:
+            values = interpolate(values,resizeTo)
+          else:
+            values = interpolate(values,inputLen)  
           # apply gaussian filter for smoothing and reducing noise
           if medianFilter:
               values = median_filter(values, size=3)
@@ -45,13 +48,17 @@ def dataToPatches(data, window_size, stride, resizeTo, medianFilter=False, gauss
           indicator += [1]*window_size
           indicator += [0]*(inputLen - i - window_size)
           channels.append(values)
-          # Normalize between 0 and 1
-          if normalize:
-              channels = np.array(channels)
-              shape = channels.shape
-              channels = list(MinMaxScaler(normalize).fit_transform(np.array(channels).reshape(-1,1)).reshape(shape))
+          
+        # Normalize between 0 and 1
+        if normalize:
+            channels = np.array(channels)
+            shape = channels.shape
+            channels = list(MinMaxScaler(normalize).fit_transform(channels.reshape(-1,1)).reshape(shape))
 
-        indicator = interpolate(indicator,resizeTo)
+        if resizeTo:
+          indicator = interpolate(indicator,resizeTo)
+        else:
+          indicator = interpolate(indicator,inputLen)  
         channels.append(indicator)
 
         inputs.append(channels)
