@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 # download file from url
 def download_file(url,saveAs):
-    if not os.path.exists('anamoly_dataset.pickle'):
+    if not os.path.exists(saveAs):
         r = requests.get(url, allow_redirects=True)
         open(saveAs, 'wb').write(r.content)
         print('file downloaded')
@@ -35,7 +35,7 @@ class mydataset(Dataset):
 
 # function to create train, val and test loaders
 def createLoaders(train_inputs, train_labels, test_inputs, test_labels, batch_size, val_percent=.25):
-    train_inputs, val_inputs, train_labels, val_labels, = train_test_split(train_inputs, train_labels, test_size=val_percent, random_state=0)
+    train_inputs, val_inputs, train_labels, val_labels = train_test_split(train_inputs, train_labels, test_size=val_percent, random_state=0)
 
     train_dataset = mydataset(train_inputs, train_labels)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
