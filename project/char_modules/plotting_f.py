@@ -38,7 +38,8 @@ def plotChar(train_data,train_indexes,train_inputs,char,index=None):
   if not index:
     # random sample of manually selected character
     index = classes.index(char)
-    indexes = np.where(np.array(train_data)==index)[0]
+    labels = [label for input,label in train_data]
+    indexes = np.where(np.array(labels)==index)[0]
     index = np.random.choice(indexes)
 
   input, label = train_data[index]
@@ -73,7 +74,8 @@ def plotTimeSeries(train_data,train_indexes,train_inputs,char,index=None):
   if not index:
     # random sample of manually selected character
     index = classes.index(char)
-    indexes = np.where(np.array(train_data)==index)[0]
+    labels = [label for input,label in train_data]
+    indexes = np.where(np.array(labels)==index)[0]
     index = np.random.choice(indexes)
 
   input, label = train_data[index]
