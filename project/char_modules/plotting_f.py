@@ -31,16 +31,21 @@ def toPlot_char(char):
     return X,Y,C
 
 
-def plotChar(train_data,train_indexes,train_inputs,char,index=None):
+def plotChar(train_data,train_indexes,train_inputs,char=None,index=None):
+
+  assert ((char is not None) or (index is not None)), "char and/or index must be provided"
 
   np.random.seed(0)
 
-  if not index:
+  if char:
     # random sample of manually selected character
-    index = classes.index(char)
+    index1 = classes.index(char)
     labels = [label for input,label in train_data]
-    indexes = np.where(np.array(labels)==index)[0]
-    index = np.random.choice(indexes)
+    indexes = np.where(np.array(labels)==index1)[0]
+    if index:
+      index = indexes[index]
+    else:
+      index = np.random.choice(indexes)      
 
   input, label = train_data[index]
 
@@ -67,16 +72,21 @@ def plotChar(train_data,train_indexes,train_inputs,char,index=None):
     for x,y,c in zip(X,Y,C):
       axs[i//cols,i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
 
-def plotTimeSeries(train_data,train_indexes,train_inputs,char,index=None):
+def plotTimeSeries(train_data,train_indexes,train_inputs,char=None,index=None):
 
+  assert ((char is not None) or (index is not None)), "char and/or index must be provided"
+  
   np.random.seed(0)
 
-  if not index:
+  if char:
     # random sample of manually selected character
-    index = classes.index(char)
+    index1 = classes.index(char)
     labels = [label for input,label in train_data]
-    indexes = np.where(np.array(labels)==index)[0]
-    index = np.random.choice(indexes)
+    indexes = np.where(np.array(labels)==index1)[0]
+    if index:
+      index = indexes[index]
+    else:
+      index = np.random.choice(indexes)      
 
   input, label = train_data[index]
 
