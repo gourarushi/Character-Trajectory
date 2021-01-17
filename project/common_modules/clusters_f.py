@@ -10,6 +10,12 @@ from guppy import hpy
 import sklearn.cluster
 from sklearn import metrics
 
+# flatten inputs to 2d array
+def flatten_to_2d(inputs):
+  nsamples, nx, ny = inputs.shape
+  sample_shape = nx, ny
+  return inputs.reshape((nsamples,nx*ny))
+
 
 def form_clusters(inputs, clustering, params, labels_true=None):
 
