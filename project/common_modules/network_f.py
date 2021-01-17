@@ -108,3 +108,13 @@ def evaluate(net,data_loader,classes=None):
     print(classification_report(y_true, y_pred, target_names=classes, labels=range(len(classes)) ,digits=4))
   else:
     print(classification_report(y_true, y_pred, digits=4))
+
+
+def getLatentFeatures(net, inputs):
+  latent_inputs = []
+  for input1 in tqdm(inputs):
+    lat_featues = net.latent(torch.from_numpy(input1).unsqueeze(0).float())
+    lat_featues = lat_featues.detach().numpy()
+    latent_inputs.append(lat_featues)
+
+  return np.array(latent_inputs)    
