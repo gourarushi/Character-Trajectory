@@ -87,7 +87,7 @@ def trainNet(net,criterion,optimizer,train_loader,val_loader,epochs,print_every=
 
 
 # evaluate and print
-def evaluate(net,data_loader,classes):
+def evaluate(net,data_loader,classes=None):
   y_true= []
   y_pred = []
   net.eval()
@@ -104,4 +104,7 @@ def evaluate(net,data_loader,classes):
         pred = np.argmax(output)
         y_pred.append(pred)
 
-  print(classification_report(y_true, y_pred, target_names=classes, labels=range(len(classes)) ,digits=4))
+  if classes is not None:
+    print(classification_report(y_true, y_pred, target_names=classes, labels=range(len(classes)) ,digits=4))
+  else:
+    print(classification_report(y_true, y_pred, digits=4))
