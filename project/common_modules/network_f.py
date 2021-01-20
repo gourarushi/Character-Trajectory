@@ -18,70 +18,80 @@ from tqdm.notebook import tqdm
 
 
 # train network
-def trainNet(net,criterion,optimizer,train_loader,val_loader,epochs,print_every=None):
+def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,print_every=None,earlyStopping=None):
 
-    if not print_every:
-        print_every = int(epochs / 10)
+  # early stopping parameter indicates how long to wait after last time validation loss improved.
 
-    avg_trainLosses = []
-    avg_valLosses = []
+  if not print_every:
+      print_every = int(epochs / 10)
 
-    for epoch in tqdm(range(epochs)):  # loop over the dataset multiple times
+  stopCounter = 0
+  avg_trainLosses = []
+  avg_valLosses = []
 
-        train_loss = []
-        val_loss = []
+  for epoch in tqdm(range(epochs)):  # loop over the dataset multiple times
 
-        net.train()
-        for i, (inputBatch,labelBatch) in enumerate(train_loader):
+    train_loss = []
+    val_loss = []
 
-            inputBatch, labelBatch = inputBatch.to(device), labelBatch.to(device)
-            inputBatch = inputBatch.float()
+    net.train()
+    for i, (inputBatch,labelBatch) in enumerate(train_loader):
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+        inputBatch, labelBatch = inputBatch.to(device), labelBatch.to(device)
+        inputBatch = inputBatch.float()
 
-            # forward + backward + optimize
-            outputBatch = net(inputBatch)
-            loss = criterion(outputBatch, labelBatch)
-            loss.backward()
-            optimizer.step()
+        # zero the parameter gradients
+        optimizer.zero_grad()
 
-            # print statistics
-            train_loss.append(loss.item())
-
-        net.eval()
-        for i, (inputBatch,labelBatch) in enumerate(val_loader):
-          with torch.no_grad():
-
-            inputBatch, labelBatch = inputBatch.to(device), labelBatch.to(device)
-            inputBatch = inputBatch.float()
-
-            # forward + backward + optimize
-            outputBatch = net(inputBatch)
-            loss = criterion(outputBatch, labelBatch)
-            val_loss.append(loss.item())
-
-        avg_trainLoss = sum(train_loss) / len(train_loss)
-        avg_valLoss = sum(val_loss) / len(val_loss)
-        avg_trainLosses.append(avg_trainLoss)
-
-        if (epoch > 0) and (avg_valLoss < min(avg_valLosses)):
-            best_params = copy.deepcopy(net.state_dict())
-            best_epoch, best_loss = epoch, avg_valLoss
-        avg_valLosses.append(avg_valLoss)
+        # forward + backward + optimize
+        outputBatch = net(inputBatch)
+        loss = criterion(outputBatch, labelBatch)
+        loss.backward()
+        optimizer.step()
 
         # print statistics
-        if epoch % print_every == print_every - 1:
-          print('epoch: %d, train loss: %.3f, val loss: %.3f' % (epoch + 1, avg_trainLoss, avg_valLoss))
+        train_loss.append(loss.item())
 
-    print('Finished Training')
-    plt.plot(avg_trainLosses, label='train loss')
-    plt.plot(avg_valLosses, label='val loss')
-    plt.plot([best_loss]*epochs, linestyle='dashed')
-    plt.plot(best_epoch, best_loss, 'o')
-    plt.legend()
+    net.eval()
+    for i, (inputBatch,labelBatch) in enumerate(val_loader):
+      with torch.no_grad():
 
-    return best_params
+        inputBatch, labelBatch = inputBatch.to(device), labelBatch.to(device)
+        inputBatch = inputBatch.float()
+
+        # forward + backward + optimize
+        outputBatch = net(inputBatch)
+        loss = criterion(outputBatch, labelBatch)
+        val_loss.append(loss.item())
+
+    avg_trainLoss = sum(train_loss) / len(train_loss)
+    avg_valLoss = sum(val_loss) / len(val_loss)
+    avg_trainLosses.append(avg_trainLoss)
+
+    if (epoch > 0) and (avg_valLoss < min(avg_valLosses)):
+        best_params = copy.deepcopy(net.state_dict())
+        best_epoch, best_loss = epoch, avg_valLoss
+        stopCounter = 0        
+    else:
+      stopCounter += 1
+      if stopCounter == earlyStopping:
+        break
+    avg_valLosses.append(avg_valLoss)   
+
+    # print statistics
+    if epoch % print_every == print_every - 1:
+      print('epoch: %d, train loss: %.3f, val loss: %.3f' % (epoch + 1, avg_trainLoss, avg_valLoss))
+
+    scheduler.step(avg_valLoss)          
+
+  print('Finished Training')
+  plt.plot(avg_trainLosses, label='train loss')
+  plt.plot(avg_valLosses, label='val loss')
+  plt.plot([best_loss]*epochs, linestyle='dashed')
+  plt.plot(best_epoch, best_loss, 'o')
+  plt.legend()
+
+  return best_params
 
 
 
