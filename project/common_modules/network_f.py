@@ -87,7 +87,7 @@ def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,pr
   print('Finished Training')
   plt.plot(avg_trainLosses, label='train loss')
   plt.plot(avg_valLosses, label='val loss')
-  plt.plot([best_loss]*epochs, linestyle='dashed')
+  plt.plot([best_loss]*epoch, linestyle='dashed')
   plt.plot(best_epoch, best_loss, 'o')
   plt.legend()
 
