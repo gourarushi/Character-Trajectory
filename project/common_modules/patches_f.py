@@ -15,6 +15,19 @@ def interpolate(arr,newSize):
   newArr = [np.interp(i,indices,arr) for i in newIndices]
   return newArr
 
+# align train_data and test_data lengths
+def append_defaults(series, target=None, default=0):
+  if target is None:
+      target = np.max([len(d[0]) for d in series])
+  result = []
+  for d in series:
+      # add 1 useless channel to d.shape[0] to make input have 4 channels
+      tmp = np.zeros((d.shape[0]+1, target))
+      for i, c in enumerate(d):
+          tmp[i, :len(c)] = c
+      result.append(tmp)
+  return np.array(result), target  
+
 # function to return list of patches for a given dataset
 def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False, gaussianFilter=False, normalize=False):
   inputs = []
@@ -29,14 +42,13 @@ def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False,
       channels = []
       # verify if last stride is possible
       if i + window_size in range(inputLen + 1):
-        for channel in input:
+        # 4th input channel is useless
+        for channel in input[:3]:
           values  = [0]*i
           values += list(channel)[i:i+window_size]
           values += [0]*(inputLen - i - window_size)
           if resizeTo:
-            values = interpolate(values,resizeTo)
-          else:
-            values = interpolate(values,inputLen)  
+            values = interpolate(values,resizeTo)  
           # apply gaussian filter for smoothing and reducing noise
           if medianFilter:
               values = median_filter(values, size=3)
@@ -56,9 +68,7 @@ def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False,
             channels = list(MinMaxScaler(normalize).fit_transform(channels.reshape(-1,1)).reshape(shape))
 
         if resizeTo:
-          indicator = interpolate(indicator,resizeTo)
-        else:
-          indicator = interpolate(indicator,inputLen)  
+          indicator = interpolate(indicator,resizeTo) 
         channels.append(indicator)
 
         inputs.append(channels)
