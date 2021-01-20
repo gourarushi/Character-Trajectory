@@ -26,7 +26,7 @@ def form_clusters(inputs, clustering, params, labels_true=None):
   else:
     param = "n_clusters"
   
-  score_types = { 
+  score_types = {
                   param : [], "n_clusters" : [],
                   "silhouette" : [], "cal_har" : [], "dav_bould" : [],
                   "adj_rand" : [],  "adj_mut_inf" : [], "v_measure" : [], "fowlk_mall" : []
