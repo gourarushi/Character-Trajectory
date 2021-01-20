@@ -85,7 +85,6 @@ def trainNet(net,criterion,optimizer,train_loader,val_loader,epochs,print_every=
 
 
 
-
 # evaluate and print
 def evaluate(net,data_loader,classes=None):
   y_true= []
