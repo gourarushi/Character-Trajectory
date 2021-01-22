@@ -96,34 +96,30 @@ def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,pr
 
 
 # evaluate and print
-def evaluate(net,data_loader,classes=None):
-  y_true= []
-  y_pred = []
-  net.eval()
+def evaluate(net,input1,output_true,classes=None):
 
-  for _, (inputBatch,labelBatch) in enumerate(tqdm(data_loader)):
-    with torch.no_grad():
-      inputBatch, labelBatch = inputBatch.to(device), labelBatch.to(device)
-      inputBatch = inputBatch.float()
-      outputBatch = net(inputBatch)
-
-      for output,label in zip(outputBatch,labelBatch):
-        output, label = output.cpu(), label.cpu()
-        y_true.append(label)
-        pred = np.argmax(output)
-        y_pred.append(pred)
+  output_pred = netOutput(net,input1,type="class")
 
   if classes is not None:
-    print(classification_report(y_true, y_pred, target_names=classes, labels=range(len(classes)) ,digits=4))
+    print(classification_report(output_true, output_pred, target_names=classes, labels=range(len(classes)) ,digits=4))
   else:
-    print(classification_report(y_true, y_pred, digits=4))
+    print(classification_report(output_true, output_pred, digits=4))
 
 
-def getLatentFeatures(net, inputs):
-  latent_inputs = []
-  for input1 in tqdm(inputs):
-    lat_featues = net.latent(torch.from_numpy(input1).unsqueeze(0).float())
-    lat_featues = lat_featues.detach().numpy()
-    latent_inputs.append(lat_featues)
+def netOutput(net, inputs, type="logits"):
+  net.eval()
+  outputs = []
 
-  return np.array(latent_inputs)    
+  with torch.no_grad():
+    for input1 in tqdm(inputs):
+      if type == "latent":
+        output = net.latent(torch.from_numpy(input1).unsqueeze(0).float()).numpy()
+      elif type == "class":
+        output = net(torch.from_numpy(input1).unsqueeze(0).float()).numpy()
+        output = np.argmax(output)
+      else:
+         output = net(torch.from_numpy(input1).unsqueeze(0).float()).numpy()
+
+      outputs.append(output)
+
+  return np.array(outputs)    
