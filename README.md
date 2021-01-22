@@ -49,5 +49,3 @@ Snythetic Anomaly Detection dataset: www.bit.ly/2UNk0Lo
 ## Milestone 3 : [TCAV for patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/3)
 
 ## Milestone 4 : [Enhanced patch classification network](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/4)
-
-## Milestone 5 : [Rethinking the patch weights](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/5)
