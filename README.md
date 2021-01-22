@@ -47,5 +47,3 @@ Snythetic Anomaly Detection dataset: www.bit.ly/2UNk0Lo
 ## Milestone 2 : [Cluster patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/2)
 
 ## Milestone 3 : [Utilize metadata of patches](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/3)
-
-## Milestone 4 : [Enhanced patch classification network](https://git.opendfki.de/mercier/pattern-relevance/-/milestones/4)
