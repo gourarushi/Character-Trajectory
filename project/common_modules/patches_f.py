@@ -77,3 +77,13 @@ def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False,
 
   inputs, labels, indexes = np.array(inputs), np.array(labels, dtype=int), np.array(indexes)
   return inputs,labels,indexes
+
+def mergePatches(inputs, patchesPerSample):
+
+  merged = []
+  for index in range(0,len(inputs),patchesPerSample):
+    input1 = np.array([x[0] for x in inputs[index : index+patchesPerSample]])
+    input1 = np.transpose(input1)
+    merged.append(input1)
+
+  return np.array(merged)  
