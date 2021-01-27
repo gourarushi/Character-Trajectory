@@ -64,9 +64,9 @@ def plotChar(train_data,train_indexes,train_inputs,char=None,index=None):
 
   for i,index in enumerate(indexes):
     input = train_inputs[index]
-    indicator = input[3]
+    '''indicator = input[3]
     indicator = np.where(indicator==1)[0]
-    input = [np.take(channel,indicator) for channel in input[:3]]
+    input = [np.take(channel,indicator) for channel in input[:3]]'''
 
     X,Y,C = toPlot_char(input)
     for x,y,c in zip(X,Y,C):
@@ -103,9 +103,9 @@ def plotTimeSeries(train_data,train_indexes,train_inputs,char=None,index=None):
 
   for i,index in enumerate(indexes):
     input = train_inputs[index]
-    indicator = input[3]
+    '''indicator = input[3]
     indicator = np.where(indicator==1)[0]
-    input = [np.take(channel,indicator) for channel in input[:3]]
+    input = [np.take(channel,indicator) for channel in input[:3]]'''
     axs[i//cols,i%cols].plot(np.transpose(input))
 
 
