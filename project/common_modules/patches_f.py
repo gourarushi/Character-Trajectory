@@ -16,13 +16,15 @@ def interpolate(arr,newSize):
   return newArr
 
 # align train_data and test_data lengths
-def append_defaults(series, target=None, default=0):
+def append_defaults(series, target=None, default=0, extraChannel=False):
   if target is None:
       target = np.max([len(d[0]) for d in series])
   result = []
   for d in series:
-      # add 1 useless channel to d.shape[0] to make input have 4 channels
-      tmp = np.zeros((d.shape[0]+1, target))
+      if extraChannel:
+        tmp = np.zeros((d.shape[0]+1, target))
+      else:
+        tmp = np.zeros((d.shape[0], target))
       for i, c in enumerate(d):
           tmp[i, :len(c)] = c
       result.append(tmp)
@@ -69,7 +71,8 @@ def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False,
 
         if resizeTo:
           indicator = interpolate(indicator,resizeTo) 
-        channels.append(indicator)
+        
+        #channels.append(indicator)
 
         inputs.append(channels)
         labels.append(label)
