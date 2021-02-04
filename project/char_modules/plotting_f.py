@@ -72,6 +72,8 @@ def plotChar(train_data,train_indexes,train_inputs,char=None,index=None):
     for x,y,c in zip(X,Y,C):
       axs[i//cols,i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
 
+  plt.show()
+
 def plotTimeSeries(train_data,train_indexes,train_inputs,char=None,index=None):
 
   assert ((char is not None) or (index is not None)), "char and/or index must be provided"
@@ -108,6 +110,8 @@ def plotTimeSeries(train_data,train_indexes,train_inputs,char=None,index=None):
     input = [np.take(channel,indicator) for channel in input[:3]]'''
     axs[i//cols,i%cols].plot(np.transpose(input))
 
+  plt.show()
+
 
 def plotClusters(cluster_centers, sample_shape):
 
@@ -124,3 +128,5 @@ def plotClusters(cluster_centers, sample_shape):
         axs[i//cols, i%cols].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
       else:
         axs[i].plot(x, y, color=c, marker='o', markersize=3.5, markerfacecolor='black')
+
+  plt.show()      
