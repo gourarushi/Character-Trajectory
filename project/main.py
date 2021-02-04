@@ -419,21 +419,21 @@ def main(args):
 
   if (args.train is not None) or (args.eval is not None):
     net = simpleApproach(train_inputs,train_labels, test_inputs,test_labels, args)
-    torch.save(net.state_dict(), "models/simpleModel") if args.saveModel else None
+    torch.save(net.state_dict(), args.saveSimple) if args.saveSimple else None
 
   if "latent" in (args.train, args.eval):
     net1 = latentApproach(patch_train_inputs, patch_test_inputs, net, args)
-    torch.save(net1.state_dict(), "models/latentModel") if args.saveModel else None
+    torch.save(net1.state_dict(), args.saveLatent) if args.saveLatent else None
   
   if (args.train in ("clustFit", "fusion")) or (args.eval in ("clustFit", "fusion")):
     net2, clustFit_train_inputs, clustFit_test_inputs = clustFitApproach(patch_train_inputs,train_labels, patch_test_inputs,test_labels, net, args)
-    torch.save(net2.state_dict(), "models/clustFitModel") if args.saveModel else None
+    torch.save(net2.state_dict(), args.saveClustFit) if args.saveClustFit else None
   
   if "fusion" in (args.train, args.eval):
     net3 = fusionApproach(train_inputs,clustFit_train_inputs,train_labels, test_inputs,clustFit_test_inputs,test_labels, args)
-    torch.save(net3.state_dict(), "models/fusionModel") if args.saveModel else None
+    torch.save(net3.state_dict(), args.saveFusion) if args.saveFusion else None
 
-
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'approaches')
     parser.add_argument('--clustering', type=bool, default=False)
@@ -442,6 +442,9 @@ if __name__ == '__main__':
     parser.add_argument('--load', type=str)
     parser.add_argument('--eval', type=str ,choices=["simple","latent","clustFit","fusion"])
 
-    parser.add_argument('--saveModel', type=bool, default=False)
+    parser.add_argument('--saveSimple', type=str, default="models/simpleModel")
+    parser.add_argument('--saveLatent', type=str, default="models/latentModel")
+    parser.add_argument('--saveClustFit', type=str, default="models/clustFitModel")
+    parser.add_argument('--saveFusion', type=str, default="models/fusionModel")
     args = parser.parse_args()
     main(args)
