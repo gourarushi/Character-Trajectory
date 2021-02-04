@@ -12,12 +12,13 @@ from sklearn.model_selection import train_test_split
 
 # download file from url
 def download_file(url,saveAs):
-    if not os.path.exists(saveAs):
-        r = requests.get(url, allow_redirects=True)
-        open(saveAs, 'wb').write(r.content)
-        print('file downloaded')
-    else:
-        print('file already exists')
+  print("download file from",url)
+  if not os.path.exists(saveAs):
+      r = requests.get(url, allow_redirects=True)
+      open(saveAs, 'wb').write(r.content)
+      print('file downloaded')
+  else:
+      print('file already exists')
 
 # create dataset and dataloaders
 class mydataset(Dataset):
