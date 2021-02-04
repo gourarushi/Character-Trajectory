@@ -20,6 +20,7 @@ from tqdm.notebook import tqdm
 # train network
 def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,print_every=None,earlyStopping=None,approach="defailt"):
 
+  print("training network")
   # early stopping parameter indicates how long to wait after last time validation loss improved.
 
   if not print_every:
@@ -96,6 +97,7 @@ def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,pr
   plt.plot([best_loss]*epoch, linestyle='dashed')
   plt.plot(best_epoch, best_loss, 'o')
   plt.legend()
+  plt.show()
 
   return best_params
 
