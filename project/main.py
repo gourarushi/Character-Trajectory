@@ -53,42 +53,13 @@ def fusionApproach(train_inputs,clustFit_train_inputs,train_labels, test_inputs,
 
   #print(train_inputs.shape)
   #print(clustFit_train_inputs.shape)
-
-  # define network
-  class Net(nn.Module):
-    def __init__(self):
-      super(Net, self).__init__()
-      # 3 input channels, 8 output channels, row convolution kernel of size 3
-      self.conv1 = nn.Conv1d(3, 8, 3)
-      self.conv2 = nn.Conv1d(8, 16, 3)
-      self.conv3 = nn.Conv1d(16, 32, 3)
-      # an affine operation: y = Wx + b
-      self.fc1 = nn.Linear(1148, 20)
-
-    def forward(self, x):
-      x1, x2 = x
-      # output given by : math.floor((inp-(k-1)-1)/s+1)
-      x = F.max_pool1d(F.relu(self.conv1(x1)), 2)
-      x = F.max_pool1d(F.relu(self.conv2(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv3(x)), 2)
-      x = x.view(-1, self.num_flat_features(x))
-      x2 = x2.view(-1, self.num_flat_features(x2))
-      x = torch.cat((x,x2),dim=1)
-      x = self.fc1(x)
-      return x
-
-    def num_flat_features(self, x):
-      size = x.size()[1:]  # all dimensions except the batch dimension
-      num_features = 1
-      for s in size:
-          num_features *= s
-      return num_features
+ 
 
   if args.eval == "fusion":
-    net = Net().to(device)
+    net = network_f.fusionNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(Net,20, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
+    net = create_train(network_f.fusionNet,20, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
   
   evaluate(net, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
 
@@ -105,29 +76,12 @@ def clustFitApproach(train_inputs, train_labels, test_inputs, test_labels, net, 
   clustFit_train_inputs = patches_f.mergePatches(clustFit_train_inputs,19)
   clustFit_test_inputs = patches_f.mergePatches(clustFit_test_inputs,19)
 
-  # define network
-  class Net(nn.Module):
-    def __init__(self):
-      super(Net, self).__init__()
-      self.fc1 = nn.Linear(380, 20)
-
-    def forward(self, x):        
-      x = x.view(-1, self.num_flat_features(x))
-      x = self.fc1(x)
-      return x
-
-    def num_flat_features(self, x):
-      size = x.size()[1:]  # all dimensions except the batch dimension
-      num_features = 1
-      for s in size:
-          num_features *= s
-      return num_features
 
   if args.eval == "clustFit":
-    net = Net().to(device)
+    net = network_f.clustFitNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(Net,20, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
+    net = create_train(network_f.clustFitNet,20, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
 
   evaluate(net, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
 
@@ -152,41 +106,13 @@ def latentApproach(train_inputs, test_inputs, net, args):
   kmeans_test_labels = kmeans.predict(latent_test_inputs2d)
 
   kmeans_train_labels = np.array([int(label) for label in kmeans_train_labels])
-  kmeans_test_labels = np.array([int(label) for label in kmeans_test_labels])
-
-  
-  # define network
-  class Net(nn.Module):
-    def __init__(self):
-      super(Net, self).__init__()
-      # 3 input channels, 8 output channels, row convolution kernel of size 3
-      self.conv1 = nn.Conv1d(3, 8, 3)
-      self.conv2 = nn.Conv1d(8, 16, 3)
-      self.conv3 = nn.Conv1d(16, 32, 3)
-      # an affine operation: y = Wx + b
-      self.fc1 = nn.Linear(768, 20)
-
-    def forward(self, x):
-      # output given by : math.floor((inp-(k-1)-1)/s+1)
-      x = F.max_pool1d(F.relu(self.conv1(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv2(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv3(x)), 2)
-      x = x.view(-1, self.num_flat_features(x))
-      x = self.fc1(x)
-      return x
-
-    def num_flat_features(self, x):
-      size = x.size()[1:]  # all dimensions except the batch dimension
-      num_features = 1
-      for s in size:
-          num_features *= s
-      return num_features
+  kmeans_test_labels = np.array([int(label) for label in kmeans_test_labels])  
 
   if args.eval == "clustFit":
-    net = Net().to(device)
+    net = network_f.simpleNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(Net,10, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
+    net = create_train(network_f.simpleNet,10, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
     
   evaluate(net, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
 
@@ -196,46 +122,11 @@ def latentApproach(train_inputs, test_inputs, net, args):
 
 def simpleApproach(train_inputs, train_labels, test_inputs, test_labels, args):
 
-  # define network
-  class Net(nn.Module):
-    def __init__(self):
-      super(Net, self).__init__()
-      # 3 input channels, 8 output channels, row convolution kernel of size 3
-      self.conv1 = nn.Conv1d(3, 8, 3)
-      self.conv2 = nn.Conv1d(8, 16, 3)
-      self.conv3 = nn.Conv1d(16, 32, 3)
-      # an affine operation: y = Wx + b
-      self.fc1 = nn.Linear(768, 20)
-
-    def forward(self, x):
-      # output given by : math.floor((inp-(k-1)-1)/s+1)
-      x = F.max_pool1d(F.relu(self.conv1(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv2(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv3(x)), 2)
-      x = x.view(-1, self.num_flat_features(x))
-      x = self.fc1(x)
-      return x
-
-    def latent(self, x):
-      # output given by : math.floor((inp-(k-1)-1)/s+1)
-      x = F.max_pool1d(F.relu(self.conv1(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv2(x)), 2)
-      x = F.max_pool1d(F.relu(self.conv3(x)), 2)
-      x = x.view(-1, self.num_flat_features(x))
-      return x
-
-    def num_flat_features(self, x):
-      size = x.size()[1:]  # all dimensions except the batch dimension
-      num_features = 1
-      for s in size:
-          num_features *= s
-      return num_features
-
   if args.eval == "simple":
-    net = Net().to(device)
+    net = network_f.simpleNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(Net,20, train_inputs, train_labels, test_inputs, test_labels)
+    net = create_train(network_f.simpleNet,20, train_inputs, train_labels, test_inputs, test_labels)
 
   evaluate(net, train_inputs, train_labels, test_inputs, test_labels)
 
@@ -411,7 +302,7 @@ def main(args):
   patch_train_inputs, patch_train_labels, patch_train_indexes, patch_test_inputs, patch_test_labels, patch_test_indexes = Patches(train_inputs, train_labels, test_inputs, test_labels)
 
 
-  if args.saveModel and not os.path.exists("models/"):
+  if (args.saveSimple or args.saveLatent or args.saveClustFit or args.saveFusion) and not os.path.exists("models/"):
     os.mkdir("models")    
   
   if args.clustering:
