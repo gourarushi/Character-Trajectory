@@ -125,7 +125,7 @@ def netOutput(net, inputs, outType="default", approach="default"):
   with torch.no_grad():
     for input1 in tqdm(inputs):
       if outType == "latent":
-        output = net.latent(torch.from_numpy(input1).unsqueeze(0).float()).cpu().numpy()
+        output = net.latent(torch.from_numpy(input1).unsqueeze(0).float()).numpy()
 
       elif outType == "class":
         if approach == "fusion":
