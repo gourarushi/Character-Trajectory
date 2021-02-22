@@ -6,6 +6,7 @@ import itertools
 # to get and read data
 import os
 from scipy.io import loadmat
+import pickle
 
 # to plot the data
 import matplotlib
@@ -56,32 +57,32 @@ def fusionApproach(train_inputs,clustFit_train_inputs,train_labels, test_inputs,
  
 
   if args.eval == "fusion":
-    net = network_f.fusionNet().to(device)
+    net = network_architectures.fusionNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(network_f.fusionNet,20, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
+    net = create_train(network_architectures.fusionNet,20, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
   
   evaluate(net, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
 
   return net 
 
 
-def clustFitApproach(train_inputs, train_labels, test_inputs, test_labels, net, args):
+def clustFitApproach(train_inputs, train_labels, test_inputs, test_labels, patches_perSample, net, args):
   
   # model based on clusterfit predictions
   clustFit_train_inputs = network_f.netOutput(net, train_inputs)
   clustFit_test_inputs = network_f.netOutput(net, test_inputs)
 
-  # 19 patches for every sample
-  clustFit_train_inputs = patches_f.mergePatches(clustFit_train_inputs,19)
-  clustFit_test_inputs = patches_f.mergePatches(clustFit_test_inputs,19)
+  # print(patches_perSample)
+  clustFit_train_inputs = patches_f.mergePatches(clustFit_train_inputs,patches_perSample)
+  clustFit_test_inputs = patches_f.mergePatches(clustFit_test_inputs,patches_perSample)
 
 
   if args.eval == "clustFit":
-    net = network_f.clustFitNet().to(device)
+    net = network_architectures.clustFitNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(network_f.clustFitNet,20, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
+    net = create_train(network_architectures.clustFitNet,20, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
 
   evaluate(net, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
 
@@ -109,10 +110,10 @@ def latentApproach(train_inputs, test_inputs, net, args):
   kmeans_test_labels = np.array([int(label) for label in kmeans_test_labels])  
 
   if args.eval == "clustFit":
-    net = network_f.simpleNet().to(device)
+    net = network_architectures.simpleNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(network_f.simpleNet,10, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
+    net = create_train(network_architectures.simpleNet,10, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
     
   evaluate(net, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
 
@@ -123,10 +124,10 @@ def latentApproach(train_inputs, test_inputs, net, args):
 def simpleApproach(train_inputs, train_labels, test_inputs, test_labels, args):
 
   if args.eval == "simple":
-    net = network_f.simpleNet().to(device)
+    net = network_architectures.simpleNet().to(device)
     net.load_state_dict(torch.load(args.load))
   else:
-    net = create_train(network_f.simpleNet,20, train_inputs, train_labels, test_inputs, test_labels)
+    net = create_train(network_architectures.simpleNet,20, train_inputs, train_labels, test_inputs, test_labels)
 
   evaluate(net, train_inputs, train_labels, test_inputs, test_labels)
 
@@ -169,7 +170,7 @@ def evaluate(net, train_inputs, train_labels,test_inputs,test_labels,approach=No
 def printNetSizes():
 
   inp_size = 206; c0 = 3;   # c0 = 4 if indicator channel else 3
-  k_conv = 4; k_pool = 2; c1 = 8; c2 = 16; c3 = 32;
+  k_conv = 3; k_pool = 2; c1 = 8; c2 = 16; c3 = 32;
 
   print("initial size  of  sample = %d x %d" % (c0,inp_size))
   conv1_outSize = inp_size-(k_conv-1)
@@ -249,39 +250,74 @@ def printLengths(train_inputs,test_inputs):
   plt.show()
 
 
-def getRead_data():
+def getRead_data(dataset):
 
   # get data
-  fsource = "https://archive.ics.uci.edu/ml/machine-learning-databases/character-trajectories/mixoutALL_shifted.mat"
-  fname = fsource[fsource.rindex('/')+1:] # fname = "mixoutALL_shifted.mat"
-  data_f.download_file(url = fsource,
-                        saveAs = fname)
+  if dataset == "Character Trajectories":
+    fsource = "https://archive.ics.uci.edu/ml/machine-learning-databases/character-trajectories/mixoutALL_shifted.mat"
+    fname = fsource[fsource.rindex('/')+1:] # fname = "mixoutALL_shifted.mat"
+    data_f.download_file(url = fsource,
+                          saveAs = fname)
 
-  #load the file
-  mat = loadmat('mixoutALL_shifted.mat')
-  #print(mat.keys())
+    #load the file
+    mat = loadmat('mixoutALL_shifted.mat')
+    #print(mat.keys())
 
 
-  # read data
-  consts = mat['consts'][0][0]
-  #print(consts)
+    # read data
+    consts = mat['consts'][0][0]
+    #print(consts)
 
-  classes = [char[0] for char in consts[3][0]]
-  #print(classes)
-  #print('number of classes :',len(classes))
+    classes = [char[0] for char in consts[3][0]]
+    #print(classes)
+    #print('number of classes :',len(classes))
 
-  #subtract 1 since np array indexing is from 0
-  labels = consts[4][0] - 1
-  inputs = mat['mixout'][0]
+    #subtract 1 since np array indexing is from 0
+    labels = consts[4][0] - 1
+    inputs = mat['mixout'][0]
 
-  train_inputs, test_inputs, train_labels, test_labels = data_f.train_test_split(inputs, labels, test_size=0.25, random_state=0)
+    train_inputs, test_inputs, train_labels, test_labels = data_f.train_test_split(inputs, labels, test_size=0.25, random_state=0)
 
-  train_labels = np.array([int(label) for label in train_labels])
-  test_labels = np.array([int(label) for label in test_labels])
+    train_labels = np.array([int(label) for label in train_labels])
+    test_labels = np.array([int(label) for label in test_labels])
 
-  #append zeroes to resize
-  train_inputs, target_len = patches_f.append_defaults(train_inputs, 206)
-  test_inputs, _ = patches_f.append_defaults(test_inputs, 206)
+    #append zeroes to resize
+    train_inputs, target_len = patches_f.append_defaults(train_inputs, 206)
+    test_inputs, _ = patches_f.append_defaults(test_inputs, 206)
+
+  elif dataset == "Anomaly":
+    data_f.download_file(url = 'https://drive.google.com/u/0/uc?id=1CdYxeX8g9wxzSnz6R51ELmJJuuZ3xlqa&export=download',
+                          saveAs = 'anomaly_dataset.pickle')
+
+    infile = open('anomaly_dataset.pickle','rb')
+    data = pickle.load(infile)
+    infile.close()
+
+    # read data
+    train_inputs, train_labels = data[0], data[1]
+    test_inputs, test_labels = data[2], data[3]
+
+    train_inputs = [np.transpose(input) for input in train_inputs]
+    test_inputs = [np.transpose(input) for input in test_inputs]
+
+    train_data = list(zip(train_inputs, train_labels))
+    test_data = list(zip(test_inputs, test_labels))
+
+    classes = ["normal","anomaly"]
+    sample_len = 50
+    # print('number of classes :',len(classes))
+
+    # print('\ntrain data contains',len(train_data),'samples')
+    # print('test data contains',len(test_data),'samples')
+
+    # print('\neach sample has 3 channels : x,y and force')
+    # print('length of each channel is', sample_len)
+
+    train_inputs = np.array(train_inputs)
+    test_inputs = np.array(test_inputs)
+
+    train_labels = np.array(train_labels, dtype=int)
+    test_labels = np.array(test_labels, dtype=int)
 
   return train_inputs, test_inputs, train_labels, test_labels
 
@@ -295,12 +331,20 @@ def getRead_data():
 
 def main(args):
 
+  global network_architectures
+  if args.dataset == "Character Trajectories":
+    from char_modules import network_architectures
+  elif args.dataset == "Anomaly":
+    from anomaly_modules import network_architectures
+
+  importlib.reload(network_architectures)  
+
   print()
-  train_inputs, test_inputs, train_labels, test_labels = getRead_data()
+  train_inputs, test_inputs, train_labels, test_labels = getRead_data(args.dataset)
   print()
   #printLengths(train_inputs,test_inputs)
   patch_train_inputs, patch_train_labels, patch_train_indexes, patch_test_inputs, patch_test_labels, patch_test_indexes = Patches(train_inputs, train_labels, test_inputs, test_labels)
-
+  patches_perSample = np.count_nonzero(patch_train_indexes==0)
 
   if (args.saveSimple or args.saveLatent or args.saveClustFit or args.saveFusion) and not os.path.exists("models/"):
     os.mkdir("models")    
@@ -317,7 +361,7 @@ def main(args):
     torch.save(net1.state_dict(), args.saveLatent) if args.saveLatent else None
   
   if (args.train in ("clustFit", "fusion")) or (args.eval in ("clustFit", "fusion")):
-    net2, clustFit_train_inputs, clustFit_test_inputs = clustFitApproach(patch_train_inputs,train_labels, patch_test_inputs,test_labels, net, args)
+    net2, clustFit_train_inputs, clustFit_test_inputs = clustFitApproach(patch_train_inputs,train_labels, patch_test_inputs,test_labels, patches_perSample, net, args)
     torch.save(net2.state_dict(), args.saveClustFit) if args.saveClustFit else None
   
   if "fusion" in (args.train, args.eval):
@@ -327,6 +371,7 @@ def main(args):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'approaches')
+    parser.add_argument('--dataset', type=str ,choices=["Character Trajectories","Anomaly"])
     parser.add_argument('--clustering', type=bool, default=False)
 
     parser.add_argument('--train', type=str ,choices=["simple","latent","clustFit","fusion"])
