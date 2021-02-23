@@ -69,7 +69,7 @@ class fusionNet(nn.Module):
     self.conv2 = nn.Conv1d(8, 16, 3)
     self.conv3 = nn.Conv1d(16, 32, 3)
     # an affine operation: y = Wx + b
-    self.fc1 = nn.Linear(848, 20)
+    self.fc1 = nn.Linear(208, 20)
 
   def forward(self, x):
     x1, x2 = x
