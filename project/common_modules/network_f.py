@@ -20,7 +20,7 @@ from tqdm.notebook import tqdm
 
 
 # train network
-def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,print_every=None,earlyStopping=None,approach="default"):
+def trainNet(net,criterion,optimizer,scheduler,train_loader,val_loader,epochs,print_every=None,earlyStopping=None,approach="defailt"):
 
   print("training network")
   # early stopping parameter indicates how long to wait after last time validation loss improved.
