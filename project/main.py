@@ -58,7 +58,7 @@ def fusionApproach(train_inputs,clustFit_train_inputs,train_labels, test_inputs,
 
   if args.eval == "fusion":
     net = network_architectures.fusionNet().to(device)
-    net.load_state_dict(torch.load(args.load))
+    net.load_state_dict(torch.load(args.load, map_location=device))
   else:
     net = create_train(network_architectures.fusionNet,20, fused_train_inputs, train_labels, fused_test_inputs, test_labels, approach="fusion")
   
@@ -80,7 +80,7 @@ def clustFitApproach(train_inputs, train_labels, test_inputs, test_labels, patch
 
   if args.eval == "clustFit":
     net = network_architectures.clustFitNet().to(device)
-    net.load_state_dict(torch.load(args.load))
+    net.load_state_dict(torch.load(args.load, map_location=device))
   else:
     net = create_train(network_architectures.clustFitNet,20, clustFit_train_inputs, train_labels, clustFit_test_inputs, test_labels)
 
@@ -111,7 +111,7 @@ def latentApproach(train_inputs, test_inputs, net, args):
 
   if args.eval == "clustFit":
     net = network_architectures.simpleNet().to(device)
-    net.load_state_dict(torch.load(args.load))
+    net.load_state_dict(torch.load(args.load, map_location=device))
   else:
     net = create_train(network_architectures.simpleNet,10, train_inputs, kmeans_train_labels, test_inputs, kmeans_test_labels)
     
@@ -125,7 +125,7 @@ def simpleApproach(train_inputs, train_labels, test_inputs, test_labels, args):
 
   if args.eval == "simple":
     net = network_architectures.simpleNet().to(device)
-    net.load_state_dict(torch.load(args.load))
+    net.load_state_dict(torch.load(args.load, map_location=device))
   else:
     net = create_train(network_architectures.simpleNet,20, train_inputs, train_labels, test_inputs, test_labels)
 
