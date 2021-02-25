@@ -15,20 +15,6 @@ def interpolate(arr,newSize):
   newArr = [np.interp(i,indices,arr) for i in newIndices]
   return newArr
 
-# align train_data and test_data lengths
-def append_defaults(series, target=None, default=0, extraChannel=False):
-  if target is None:
-      target = np.max([len(d[0]) for d in series])
-  result = []
-  for d in series:
-      if extraChannel:
-        tmp = np.zeros((d.shape[0]+1, target))
-      else:
-        tmp = np.zeros((d.shape[0], target))
-      for i, c in enumerate(d):
-          tmp[i, :len(c)] = c
-      result.append(tmp)
-  return np.array(result), target  
 
 # function to return list of patches for a given dataset
 def dataToPatches(data, window_size, stride, resizeTo=False, medianFilter=False, gaussianFilter=False, normalize=False):
