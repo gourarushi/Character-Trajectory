@@ -2,11 +2,7 @@ import argparse
 
 import numpy as np
 import itertools
-
-# to get and read data
 import os
-from scipy.io import loadmat
-import pickle
 
 # to plot the data
 import matplotlib
@@ -35,7 +31,7 @@ from char_modules import preprocess_f, plotting_f
 
 # reload module
 import importlib
-importlib.reload(network_f)
+importlib.reload(data_f)
 
 
 
@@ -250,79 +246,6 @@ def printLengths(train_inputs,test_inputs):
   plt.show()
 
 
-def getRead_data(dataset):
-
-  # get data
-  if dataset == "Character Trajectories":
-    fsource = "https://archive.ics.uci.edu/ml/machine-learning-databases/character-trajectories/mixoutALL_shifted.mat"
-    fname = fsource[fsource.rindex('/')+1:] # fname = "mixoutALL_shifted.mat"
-    data_f.download_file(url = fsource,
-                          saveAs = fname)
-
-    #load the file
-    mat = loadmat('mixoutALL_shifted.mat')
-    #print(mat.keys())
-
-
-    # read data
-    consts = mat['consts'][0][0]
-    #print(consts)
-
-    classes = [char[0] for char in consts[3][0]]
-    #print(classes)
-    #print('number of classes :',len(classes))
-
-    #subtract 1 since np array indexing is from 0
-    labels = consts[4][0] - 1
-    inputs = mat['mixout'][0]
-
-    train_inputs, test_inputs, train_labels, test_labels = data_f.train_test_split(inputs, labels, test_size=0.25, random_state=0)
-
-    train_labels = np.array([int(label) for label in train_labels])
-    test_labels = np.array([int(label) for label in test_labels])
-
-    #append zeroes to resize
-    train_inputs, target_len = patches_f.append_defaults(train_inputs, 206)
-    test_inputs, _ = patches_f.append_defaults(test_inputs, 206)
-
-  elif dataset == "Anomaly":
-    data_f.download_file(url = 'https://drive.google.com/u/0/uc?id=1CdYxeX8g9wxzSnz6R51ELmJJuuZ3xlqa&export=download',
-                          saveAs = 'anomaly_dataset.pickle')
-
-    infile = open('anomaly_dataset.pickle','rb')
-    data = pickle.load(infile)
-    infile.close()
-
-    # read data
-    train_inputs, train_labels = data[0], data[1]
-    test_inputs, test_labels = data[2], data[3]
-
-    train_inputs = [np.transpose(input) for input in train_inputs]
-    test_inputs = [np.transpose(input) for input in test_inputs]
-
-    train_data = list(zip(train_inputs, train_labels))
-    test_data = list(zip(test_inputs, test_labels))
-
-    classes = ["normal","anomaly"]
-    sample_len = 50
-    # print('number of classes :',len(classes))
-
-    # print('\ntrain data contains',len(train_data),'samples')
-    # print('test data contains',len(test_data),'samples')
-
-    # print('\neach sample has 3 channels : x,y and force')
-    # print('length of each channel is', sample_len)
-
-    train_inputs = np.array(train_inputs)
-    test_inputs = np.array(test_inputs)
-
-    train_labels = np.array(train_labels, dtype=int)
-    test_labels = np.array(test_labels, dtype=int)
-
-  return train_inputs, test_inputs, train_labels, test_labels
-
-
-
 
 
 
@@ -340,7 +263,7 @@ def main(args):
   importlib.reload(network_architectures)  
 
   print()
-  train_inputs, test_inputs, train_labels, test_labels = getRead_data(args.dataset)
+  train_inputs, test_inputs, train_labels, test_labels = data_f.getRead_data(args.dataset)
   print()
   #printLengths(train_inputs,test_inputs)
   patch_train_inputs, patch_train_labels, patch_train_indexes, patch_test_inputs, patch_test_labels, patch_test_indexes = Patches(train_inputs, train_labels, test_inputs, test_labels)
@@ -371,7 +294,7 @@ def main(args):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'approaches')
-    parser.add_argument('--dataset', type=str ,choices=["Character Trajectories","Anomaly"])
+    parser.add_argument('--dataset', type=str ,choices=["Character Trajectories","Anomaly"]) 
     parser.add_argument('--clustering', type=bool, default=False)
 
     parser.add_argument('--train', type=str ,choices=["simple","latent","clustFit","fusion"])
